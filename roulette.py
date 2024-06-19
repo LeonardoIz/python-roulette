@@ -1,8 +1,4 @@
-import os
-import secrets
-import hashlib
-import hmac
-import re
+import os, secrets, hashlib, hmac, re
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
