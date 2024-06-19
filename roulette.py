@@ -1,4 +1,4 @@
-import os, secrets, hashlib, hmac, re
+import os, secrets, hashlib, hmac, re, time
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -7,6 +7,7 @@ from colorama import init, Fore, Style
 
 # Inicializar colorama
 init(autoreset=True)
+
 
 # Clase de gestión de semillas para Provably Fair
 class SeedManager:
@@ -155,7 +156,6 @@ class Player:
         self.balance += amount
         print(Fore.RED + f"The bet of ${amount} has been refunded due to verification failure.\n" + Style.RESET_ALL)
 
-
 # Función para centrar una cadena en la consola
 def print_centered(input_string, total_width):
 
@@ -182,6 +182,104 @@ def display_header():
     print(Fore.GREEN + "=" * 40)
     print(Fore.GREEN + "THE FAIR ROULETTE".center(40))
     print(Fore.GREEN + "=" * 40 + Style.RESET_ALL)
+
+def animate_roulette(bet_type, bet_value, amount):
+    # Definimos los frames de la animación con colores
+    frames = [
+        [
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.GREEN}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.GREEN}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.GREEN}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.GREEN}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.GREEN}○{Style.RESET_ALL}",
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.GREEN}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.GREEN}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"                 {Fore.GREEN}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.GREEN}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.GREEN}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.GREEN}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}       {Fore.BLACK}○{Style.RESET_ALL}",
+            f"                 {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL}",
+        ],
+        [
+            f"                 {Fore.GREEN}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"               {Fore.BLACK}○{Style.RESET_ALL}   {Fore.BLUE}●{Style.RESET_ALL}   {Fore.BLACK}○{Style.RESET_ALL}",
+            f"               {Fore.RED}○{Style.RESET_ALL}       {Fore.RED}○{Style.RESET_ALL}",
+            f"                 {Fore.BLACK}○{Style.RESET_ALL} {Fore.RED}○{Style.RESET_ALL} {Fore.BLACK}○{Style.RESET_ALL}",
+        ],
+    ]
+    print("\n")
+    print_centered(f"Selected bet: {bet_type}, {bet_value}", 40)
+    print(f"Bet amount: ${amount}".center(40) + "\n")
+    print(Fore.BLUE + "Spinning roulette...".center(40) + "\n" + Style.RESET_ALL)
+    # Ejecutamos la animación en bucle
+    for i in range(36):  # Número de ciclos de animación
+        for line in frames[i % len(frames)]:
+            print(line, end="\r")  # Sobrescribe la línea
+        time.sleep(0.5)
 
 # Función principal del juego
 def main(player_name="John Doe", initial_balance=1000):
@@ -247,6 +345,9 @@ def main(player_name="John Doe", initial_balance=1000):
             bet = player.place_bet(amount, bet_type, bet_value)
             if bet is None:
                 continue
+
+            # Animación de la ruleta
+            animate_roulette(bet_type, bet_value, amount)
 
             result = seed_manager.generate_random_number(seed_manager.nonce)
             color = roulette.color_of(result)
