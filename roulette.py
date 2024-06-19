@@ -1,4 +1,8 @@
-import os, hashlib, hmac, random, re
+import os
+import secrets
+import hashlib
+import hmac
+import re
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -17,10 +21,10 @@ class SeedManager:
         self.nonce = 0
 
     def generate_server_seed(self):
-        return hashlib.sha256(str(random.getrandbits(256)).encode('utf-8')).hexdigest()
+        return hashlib.sha256(secrets.token_bytes(32)).hexdigest()
 
     def generate_client_seed(self):
-        return hashlib.sha256(str(random.getrandbits(256)).encode('utf-8')).hexdigest()
+        return hashlib.sha256(secrets.token_bytes(32)).hexdigest()
 
     def encrypt_seed(self, seed):
         backend = default_backend()
@@ -197,7 +201,7 @@ def main(player_name="John Doe", initial_balance=1000):
             player_info = f"Player: {Fore.CYAN}{player.name}{Style.RESET_ALL}, Balance: {Fore.YELLOW}${player.balance}{Style.RESET_ALL}"
             print_centered(player_info, 40)
             print("\n" + Fore.BLUE + "Place your bet!".center(40) + Style.RESET_ALL)
-            print(Fore.GREEN + "-" * 40 + Style.RESET_ALL)
+            print(Fore.BLUE + "-" * 40 + Style.RESET_ALL)
             print(""" - Number (0, 1-36)
  - Color (Red, Black)
  - Odd/Even
@@ -206,21 +210,41 @@ def main(player_name="John Doe", initial_balance=1000):
  - Column (1st, 2nd, 3rd)
 """)
             bet_type = input("Selection: ").strip().lower()
-            if bet_type == 'number':
-                bet_value = int(input("Enter the number (0, 1-36): ").strip())
-            elif bet_type == 'color':
-                bet_value = input("Enter the color (red, black): ").strip().lower()
-            elif bet_type == 'odd/even':
-                bet_value = input("Enter (odd, even): ").strip().lower()
-            elif bet_type == 'high/low':
-                bet_value = input("Enter (high, low): ").strip().lower()
-            elif bet_type == 'dozen':
-                bet_value = input("Enter (1st, 2nd, 3rd): ").strip().lower()
-            elif bet_type == 'column':
-                bet_value = input("Enter (1st, 2nd, 3rd): ").strip().lower()
-            else:
+            valid_bet_types = ['number', 'color', 'odd/even', 'high/low', 'dozen', 'column']
+            if bet_type not in valid_bet_types:
                 print(Fore.RED + "Invalid bet type" + Style.RESET_ALL)
                 continue
+
+            if bet_type == 'number':
+                bet_value = int(input("Enter the number (0, 1-36): ").strip())
+                if bet_value not in range(37):
+                    print(Fore.RED + "Invalid number" + Style.RESET_ALL)
+                    continue
+            elif bet_type == 'color':
+                bet_value = input("Enter the color (red, black): ").strip().lower()
+                if bet_value not in ['red', 'black']:
+                    print(Fore.RED + "Invalid color" + Style.RESET_ALL)
+                    continue
+            elif bet_type == 'odd/even':
+                bet_value = input("Enter (odd, even): ").strip().lower()
+                if bet_value not in ['odd', 'even']:
+                    print(Fore.RED + "Invalid selection" + Style.RESET_ALL)
+                    continue
+            elif bet_type == 'high/low':
+                bet_value = input("Enter (high, low): ").strip().lower()
+                if bet_value not in ['high', 'low']:
+                    print(Fore.RED + "Invalid selection" + Style.RESET_ALL)
+                    continue
+            elif bet_type == 'dozen':
+                bet_value = input("Enter (1st, 2nd, 3rd): ").strip().lower()
+                if bet_value not in ['1st', '2nd', '3rd']:
+                    print(Fore.RED + "Invalid selection" + Style.RESET_ALL)
+                    continue
+            elif bet_type == 'column':
+                bet_value = input("Enter (1st, 2nd, 3rd): ").strip().lower()
+                if bet_value not in ['1st', '2nd', '3rd']:
+                    print(Fore.RED + "Invalid selection" + Style.RESET_ALL)
+                    continue
 
             amount = int(input("Enter the bet amount: ").strip())
 
